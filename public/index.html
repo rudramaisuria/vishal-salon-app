@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>V Professional Unisex Salon</title>
+  <meta name="theme-color" content="#18181b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <!-- App Header -->
+  <header>
+    <div class="header-inner">
+      <div>
+        <h1>V Professional Unisex Salon</h1>
+        <small>Customer Management • Payments • Reminders</small>
+      </div>
+      <div class="header-status">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="statusText">Connecting...</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- TAB 1: HOME (Customer History) -->
+    <section id="home" class="section active">
+      <!-- Top Action Bar -->
+      <div class="top-bar">
+        <input id="search" placeholder="🔍 Customer name / mobile search...">
+        <button class="btn-gold" onclick="openCalendarModal()" title="Payment Calendar" style="flex:0 0 auto; padding:11px 16px">📅</button>
+      </div>
+
+      <!-- Quick Stats Overview -->
+      <div class="grid3">
+        <div class="stat">
+          <span class="stat-label">Customers</span>
+          <b id="statCustomers">0</b>
+        </div>
+        <div class="stat highlight">
+          <span class="stat-label">આજની બાકી</span>
+          <b id="statPending">₹0</b>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Reminders</span>
+          <b id="statReminders">0</b>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Customer History</h2>
+          <button class="btn-primary" onclick="openCustomerModal()">+ Add Customer</button>
+        </div>
+        <div id="customerList"></div>
+      </div>
+    </section>
+
+    <!-- TAB 2: STAFF & SERVICE REPORT -->
+    <section id="staff" class="section">
+      <div class="card">
+        <div class="card-header" style="flex-wrap:wrap; gap:8px">
+          <div>
+            <h2 class="card-title">✂️ Staff & Service Report</h2>
+            <p class="item-sub" style="margin:2px 0 0 0">કોના દ્વારા કઈ Service આપવામાં આવી છે તેનો હિસાબ</p>
+          </div>
+          <button class="btn-gold" style="padding:6px 12px; font-size:12px; font-weight:700" onclick="openStaffManageModal()">⚙️ Manage Staff</button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="grid" style="margin-top:14px; margin-bottom:10px">
+          <div>
+            <label>👤 Staff પસંદ કરો</label>
+            <select id="staffReportSelect" onchange="renderStaffReport()">
+              <option value="Vishal Maisuria (Owner)">👑 Vishal Maisuria (Owner)</option>
+              <option value="combine">🤝 Combine</option>
+            </select>
+          </div>
+          <div>
+            <label>📅 તારીખ Filter</label>
+            <select id="staffReportDateFilter" onchange="toggleStaffCustomDate(this.value)">
+              <option value="all">બધી તારીખો (All Time)</option>
+              <option value="today">આજની તારીખ (Today)</option>
+              <option value="week">છેલ્લા 7 દિવસ (Last 7 Days)</option>
+              <option value="month">આ મહિનો (This Month)</option>
+              <option value="custom">કસ્ટમ તારીખ (Pick Date)...</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="staffCustomDateWrap" style="display:none; margin-bottom:12px">
+          <label>તારીખ પસંદ કરો (Select Date)</label>
+          <input id="staffCustomDate" type="date" onchange="renderStaffReport()">
+        </div>
+
+        <div style="margin-bottom:14px; position:relative">
+          <input id="staffSearchInput" placeholder="🔍 Search customer / service name..." oninput="renderStaffReport()">
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="grid3" id="staffStatsGrid" style="margin-bottom:16px">
+          <div class="stat">
+            <span class="stat-label">કુલ Services</span>
+            <b id="staffStatServices">0</b>
+          </div>
+          <div class="stat highlight">
+            <span class="stat-label">કુલ બિઝનેસ</span>
+            <b id="staffStatRevenue">₹0</b>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Customers</span>
+            <b id="staffStatCustomers">0</b>
+          </div>
+        </div>
+
+        <!-- Staff Member Overview Cluster (Cards per staff member) -->
+        <div id="staffMembersOverview" style="margin-bottom:16px"></div>
+
+        <!-- Services Detailed Cards List -->
+        <div class="card-header" style="margin-bottom:8px">
+          <h3 style="font-size:15px; margin:0">📜 Services Records List</h3>
+          <span id="staffServicesCountBadge" style="font-size:12px; font-weight:700; color:var(--gold)">0 Entries</span>
+        </div>
+        <div id="staffReportList"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: REMINDERS (Birthday / Anniversary) -->
+    <section id="reminders" class="section">
+      <div class="card">
+        <h2 class="card-title" style="margin-bottom:12px">🔔 Birthday & Anniversary Reminders (આગામી 7 દિવસ)</h2>
+        <div id="reminderList"></div>
+      </div>
+    </section>
+
+    <!-- TAB 5: CASHFLOW (આવક - જાવક) -->
+    <section id="cashflow" class="section">
+      <div class="card">
+        <h2 class="card-title" style="margin-bottom:12px">💵 આવક / જાવક એન્ટ્રી</h2>
+        <div class="grid">
+          <div>
+            <label>તારીખ (Date)</label>
+            <input id="cfDate" type="date">
+          </div>
+          <div>
+            <label>સમય (Time)</label>
+            <input id="cfTime" type="time">
+          </div>
+          <div>
+            <label>પ્રકાર (Type)</label>
+            <select id="cfType">
+              <option value="income">🟢 આવક (Income)</option>
+              <option value="expense">🔴 જાવક (Expense)</option>
+            </select>
+          </div>
+          <div>
+            <label>રકમ (Amount)</label>
+            <input id="cfAmount" type="number" placeholder="₹ Amount">
+          </div>
+          <div style="grid-column: 1 / -1">
+            <label>વિગત (Note)</label>
+            <input id="cfNote" placeholder="Product / Rent / Other">
+          </div>
+        </div>
+        <br>
+        <button class="btn-primary" style="width:100%" onclick="addCashflow()">+ Save Cashflow Entry</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="flex-wrap:wrap; gap:8px">
+          <h2 class="card-title">આવક / જાવક History</h2>
+          <div style="display:flex; gap:6px; align-items:center">
+            <input id="cfFilterDate" type="date" style="max-width:140px; padding:6px 10px" onchange="renderCashflow()">
+            <button class="btn-muted" onclick="clearCashflowFilter()" style="padding:6px 12px; font-size:12px; font-weight:700; white-space:nowrap">Show All</button>
+          </div>
+        </div>
+        <div id="cashflowList"></div>
+      </div>
+    </section>
+
+    <!-- TAB 6: SETTINGS & BACKUP -->
+    <section id="settings" class="section">
+      <div class="card">
+        <h2 class="card-title">✂️ Services & Pricing Catalog</h2>
+        <p class="item-sub" style="margin-bottom:12px">
+          અહીં દરેક Service નું નામ અને Price બદલી શકાય છે. નવી Service પણ ઉમેરી શકો છો.
+        </p>
+
+        <!-- Service Search Bar -->
+        <div style="margin-bottom:14px">
+          <div style="position:relative; display:flex; align-items:center">
+            <input id="serviceSearch" type="text" placeholder="🔍 Search service (e.g. Haircut, Shaving, Facial)..." oninput="renderServices()" style="padding-right:32px">
+            <button id="clearServiceSearchBtn" onclick="clearServiceSearch()" style="position:absolute; right:10px; background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; display:none" title="Clear">✕</button>
+          </div>
+          <div id="serviceSearchStatus" style="font-size:12px; margin-top:6px; font-weight:600"></div>
+        </div>
+
+        <div id="servicesList"></div>
+        <div style="display:flex; gap:10px; margin-top:12px">
+          <button class="btn-gold" style="flex:1" onclick="addServiceRow()">+ Add Service</button>
+          <button class="btn-primary" style="flex:1" onclick="saveServices()">Save All Services</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">👥 Salon Staff Management</h2>
+          <button class="btn-gold" style="padding:6px 12px; font-size:12px; font-weight:700" onclick="openStaffManageModal()">+ Add Staff</button>
+        </div>
+        <p class="item-sub" style="margin-bottom:12px">
+          Vishal Maisuria (Owner) સિવાય તમારા સ્ટાફ મેમ્બર્સના નામ અહીં સેવ કરો જેથી Add Customer અને Bill માં ઝડપથી સિલેક્ટ કરી શકાય.
+        </p>
+        <div id="staffListSettings"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">💾 Database Backup & Restore</h2>
+        <p class="item-sub" style="margin-bottom:12px">
+          તમારો સમગ્ર Salon Data સુરક્ષિત રાખવા માટે Backup ડાઉનલોડ કરો અથવા જૂનો Backup Restore કરો.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:10px">
+          <button class="btn-gold" onclick="exportDataBackup()">📥 Download Backup (JSON File)</button>
+          <label class="btn-outline" style="text-align:center; padding:11px; cursor:pointer; margin:0">
+            📤 Restore Backup (Select JSON File)
+            <input type="file" accept=".json" style="display:none" onchange="importDataBackup(event)">
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mobile Bottom Navigation Bar (5 Tabs) -->
+    <nav class="bottom-nav">
+      <button id="tab-home" class="active" onclick="showTab('home')">
+        <span class="nav-icon">👤</span>Customer
+      </button>
+      <button id="tab-staff" onclick="showTab('staff')">
+        <span class="nav-icon">✂️</span>Staff Work
+      </button>
+      <button id="tab-reminders" onclick="showTab('reminders')">
+        <span class="nav-icon" style="position:relative; display:inline-block">
+          🔔
+          <span id="navReminderBadge" class="nav-badge" style="display:none">0</span>
+        </span>
+        Reminder
+      </button>
+      <button id="tab-cashflow" onclick="showTab('cashflow')">
+        <span class="nav-icon">💵</span>આવક-જાવક
+      </button>
+      <button id="tab-settings" onclick="showTab('settings')">
+        <span class="nav-icon">⚙️</span>Setting
+      </button>
+    </nav>
+  </div>
+
+  <!-- Reusable Bottom Sheet Modal -->
+  <div id="modal" class="modal" onclick="if(event.target.id==='modal') closeModal()">
+    <div class="modal-sheet">
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
+
